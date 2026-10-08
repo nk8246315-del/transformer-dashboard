@@ -657,10 +657,29 @@ updateDashboard();
 Demo update every 2 seconds
 */
 
-setInterval(
-demoData,
-2000
-);
+const API_URL = "https://script.google.com/macros/s/AKfycbxJvX3TcFgy0lUlDVTchG-9YGk9K8OsSFqITQoCOqqjNgdA4uV_HEqit1MmDe0uGAUiUw/exec";
+
+function getRealData() {
+  const callbackName = "transformerCallback_" + Date.now();
+
+  window[callbackName] = function(data) {
+    temperature = Number(data.temperature) || 0;
+    voltage = Number(data.voltage) || 0;
+    current = Number(data.current) || 0;
+
+    updateDashboard();
+
+    delete window[callbackName];
+    script.remove();
+  };
+
+  const script = document.createElement("script");
+  script.src = API_URL + "?callback=" + callbackName;
+  document.body.appendChild(script);
+}
+
+getRealData();
+setInterval(getRealData, 2000);
 
 </script>
 
