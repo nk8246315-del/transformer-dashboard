@@ -14,13 +14,13 @@
 }
 
 body{
-    font-family:Arial, sans-serif;
+    font-family:Arial,sans-serif;
     background:#07111f;
     color:white;
 }
 
 .container{
-    max-width:1200px;
+    max-width:1250px;
     margin:auto;
     padding:20px;
 }
@@ -49,10 +49,98 @@ h1{
     font-weight:bold;
 }
 
-.cards{
+.transformer-grid{
     display:grid;
-    grid-template-columns:repeat(4,1fr);
+    grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
     gap:16px;
+}
+
+.transformer-card{
+    background:#101d30;
+    border:1px solid #243750;
+    border-radius:16px;
+    padding:20px;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.transformer-card:hover{
+    transform:translateY(-3px);
+}
+
+.transformer-title{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:15px;
+}
+
+.transformer-title h2{
+    font-size:20px;
+}
+
+.badge{
+    padding:6px 10px;
+    border-radius:15px;
+    font-size:12px;
+    font-weight:bold;
+}
+
+.normal{
+    background:#123d25;
+    color:#5cff91;
+}
+
+.warning{
+    background:#493b0b;
+    color:#ffd85a;
+}
+
+.critical{
+    background:#4b151b;
+    color:#ff6b78;
+}
+
+.offline{
+    background:#333b45;
+    color:#b8c1ca;
+}
+
+.mini-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+}
+
+.mini{
+    background:#0a1626;
+    padding:12px;
+    border-radius:10px;
+}
+
+.label{
+    color:#8fa1b8;
+    font-size:13px;
+}
+
+.value{
+    font-size:22px;
+    font-weight:bold;
+    margin-top:5px;
+}
+
+.unit{
+    font-size:12px;
+    color:#8fa1b8;
+}
+
+.detail{
+    display:none;
+    margin-top:20px;
+}
+
+.detail.active{
+    display:block;
 }
 
 .card{
@@ -60,35 +148,23 @@ h1{
     border:1px solid #243750;
     border-radius:16px;
     padding:20px;
-    box-shadow:0 8px 25px rgba(0,0,0,.25);
+    margin-bottom:16px;
 }
 
-.label{
-    color:#8fa1b8;
-    font-size:14px;
-}
-
-.value{
-    font-size:32px;
-    font-weight:bold;
-    margin-top:10px;
-}
-
-.unit{
-    font-size:15px;
-    color:#8fa1b8;
-}
-
-.row{
-    display:grid;
-    grid-template-columns:2fr 1fr;
-    gap:16px;
-    margin-top:16px;
-}
-
-h2{
-    font-size:19px;
+.detail-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
     margin-bottom:15px;
+}
+
+.back{
+    background:#243750;
+    color:white;
+    border:0;
+    padding:9px 14px;
+    border-radius:8px;
+    cursor:pointer;
 }
 
 .status{
@@ -96,8 +172,6 @@ h2{
     padding:9px 16px;
     border-radius:20px;
     font-weight:bold;
-    background:#123d25;
-    color:#5cff91;
     margin-bottom:15px;
 }
 
@@ -129,6 +203,15 @@ canvas{
     border-radius:10px;
 }
 
+.empty{
+    background:#101d30;
+    border:1px solid #243750;
+    border-radius:16px;
+    padding:30px;
+    text-align:center;
+    color:#8fa1b8;
+}
+
 .footer{
     text-align:center;
     color:#65778e;
@@ -136,17 +219,7 @@ canvas{
     font-size:13px;
 }
 
-@media(max-width:850px){
-    .cards{
-        grid-template-columns:repeat(2,1fr);
-    }
-
-    .row{
-        grid-template-columns:1fr;
-    }
-}
-
-@media(max-width:500px){
+@media(max-width:600px){
     .container{
         padding:12px;
     }
@@ -158,19 +231,6 @@ canvas{
     .online{
         display:inline-block;
         margin-top:12px;
-    }
-
-    .cards{
-        grid-template-columns:1fr 1fr;
-        gap:10px;
-    }
-
-    .card{
-        padding:15px;
-    }
-
-    .value{
-        font-size:24px;
     }
 
     h1{
@@ -190,9 +250,8 @@ canvas{
 <h1>⚡ Transformer Health Monitor</h1>
 
 <div class="subtitle">
-ESP32 • AI Predictive Maintenance System
+ESP32 • AI Predictive Maintenance • Multi Transformer
 </div>
-
 </div>
 
 <div class="online">
@@ -202,51 +261,78 @@ ESP32 • AI Predictive Maintenance System
 </header>
 
 
-<!-- SENSOR CARDS -->
+<!-- TRANSFORMER LIST -->
 
-<div class="cards">
+<div id="transformerList" class="transformer-grid">
+
+<div class="empty">
+Loading transformer data...
+</div>
+
+</div>
+
+
+<!-- DETAIL VIEW -->
+
+<div id="detailView" class="detail">
+
+<div class="detail-header">
+
+<h2 id="detailTitle">
+Transformer
+</h2>
+
+<button class="back" onclick="showList()">
+← Back
+</button>
+
+</div>
+
 
 <div class="card">
+
+<div id="detailStatus" class="status normal">
+NORMAL
+</div>
+
+<div class="mini-grid">
+
+<div class="mini">
 <div class="label">🌡 Temperature</div>
 <div class="value">
-<span id="temperature">42.5</span>
+<span id="detailTemperature">0</span>
 <span class="unit">°C</span>
 </div>
 </div>
 
-
-<div class="card">
+<div class="mini">
 <div class="label">⚡ Voltage</div>
 <div class="value">
-<span id="voltage">11.8</span>
+<span id="detailVoltage">0</span>
 <span class="unit">V</span>
 </div>
 </div>
 
-
-<div class="card">
+<div class="mini">
 <div class="label">🔌 Current</div>
 <div class="value">
-<span id="current">1.42</span>
+<span id="detailCurrent">0</span>
 <span class="unit">A</span>
 </div>
 </div>
 
-
-<div class="card">
+<div class="mini">
 <div class="label">📊 Load</div>
 <div class="value">
-<span id="load">56.8</span>
+<span id="detailLoad">0</span>
 <span class="unit">%</span>
 </div>
 </div>
 
 </div>
 
+</div>
 
-<!-- GRAPH + STATUS -->
-
-<div class="row">
 
 <div class="card">
 
@@ -264,105 +350,64 @@ height="280">
 
 <h2>🩺 Transformer Status</h2>
 
-<div id="status"
-class="status">
-NORMAL
-</div>
-
 <table>
 
 <tr>
+<td>Transformer ID</td>
+<td id="detailId">--</td>
+</tr>
+
+<tr>
 <td>Relay</td>
-<td id="relay">ON</td>
+<td id="detailRelay">--</td>
 </tr>
 
 <tr>
 <td>Temperature</td>
-<td id="tempStatus">42.5 °C</td>
+<td id="detailTempStatus">--</td>
 </tr>
 
 <tr>
 <td>Voltage</td>
-<td id="voltStatus">11.8 V</td>
+<td id="detailVoltStatus">--</td>
 </tr>
 
 <tr>
 <td>Current</td>
-<td id="currentStatus">1.42 A</td>
+<td id="detailCurrentStatus">--</td>
 </tr>
 
 <tr>
 <td>Load</td>
-<td id="loadStatus">56.8 %</td>
+<td id="detailLoadStatus">--</td>
+</tr>
+
+<tr>
+<td>Last Update</td>
+<td id="detailUpdate">--</td>
 </tr>
 
 </table>
 
 </div>
 
-</div>
-
-
-<!-- AI -->
 
 <div class="card">
 
 <h2>🤖 AI Diagnosis</h2>
 
-<div class="ai" id="aiDiagnosis">
-
-Transformer parameters are currently within
-the normal operating range.
-
-Continue monitoring temperature,
-voltage and current.
-
+<div class="ai" id="detailAI">
+Waiting for AI diagnosis...
 </div>
 
 </div>
-
-
-<!-- SYSTEM INFORMATION -->
-
-<div class="card">
-
-<h2>⚙ System Information</h2>
-
-<table>
-
-<tr>
-<td>Device</td>
-<td>ESP32 Transformer Monitor</td>
-</tr>
-
-<tr>
-<td>ADC</td>
-<td>ADS1115 16-bit</td>
-</tr>
-
-<tr>
-<td>Temperature Sensor</td>
-<td>DS18B20</td>
-</tr>
-
-<tr>
-<td>Connection</td>
-<td>Online Dashboard</td>
-</tr>
-
-<tr>
-<td>Last Update</td>
-<td id="lastUpdate">--</td>
-</tr>
-
-</table>
 
 </div>
 
 
 <div class="footer">
 
-Transformer Health Monitoring System • ESP32
+Transformer Health Monitoring System • ESP32 • Multi Transformer
 
 </div>
 
@@ -371,11 +416,23 @@ Transformer Health Monitoring System • ESP32
 
 <script>
 
-let temperature = 42.5;
-let voltage = 11.8;
-let current = 1.42;
+/* =====================================================
+   GOOGLE APPS SCRIPT URL
+===================================================== */
 
-let history = [];
+const API_URL =
+"https://script.google.com/macros/s/AKfycbycrP8UjNxABBeBz0quX8bp2uTmL--8xrKRfSc-nXZHeNK32bY-Nf_QtyDaxDICYLSajQ/exec";
+
+
+/* =====================================================
+   GLOBAL DATA
+===================================================== */
+
+let transformers = {};
+
+let selectedTransformer = null;
+
+let history = {};
 
 const canvas =
 document.getElementById("graph");
@@ -384,302 +441,587 @@ const ctx =
 canvas.getContext("2d");
 
 
-function updateDashboard(){
+/* =====================================================
+   GET REAL DATA
+===================================================== */
 
-let load =
-(current / 2.5) * 100;
+function getRealData(){
 
-if(load > 100){
-load = 100;
+    const callbackName =
+    "transformerCallback_" + Date.now();
+
+    window[callbackName] = function(data){
+
+        transformers = data || {};
+
+        updateTransformerList();
+
+        if(selectedTransformer &&
+           transformers[selectedTransformer]){
+
+            updateDetail(selectedTransformer);
+        }
+
+        delete window[callbackName];
+
+        if(script.parentNode){
+            script.remove();
+        }
+    };
+
+
+    const script =
+    document.createElement("script");
+
+    script.src =
+    API_URL +
+    "?callback=" +
+    callbackName;
+
+    document.body.appendChild(script);
+
+
+    setTimeout(function(){
+
+        if(window[callbackName]){
+
+            delete window[callbackName];
+
+            if(script.parentNode){
+                script.remove();
+            }
+
+        }
+
+    },8000);
+
 }
 
 
-/* SENSOR VALUES */
+/* =====================================================
+   TRANSFORMER LIST
+===================================================== */
 
-document.getElementById("temperature")
-.innerText =
-temperature.toFixed(1);
+function updateTransformerList(){
 
-document.getElementById("voltage")
-.innerText =
-voltage.toFixed(1);
+    const container =
+    document.getElementById("transformerList");
 
-document.getElementById("current")
-.innerText =
-current.toFixed(2);
+    container.innerHTML = "";
 
-document.getElementById("load")
-.innerText =
-load.toFixed(1);
+    const ids =
+    Object.keys(transformers);
 
 
-/* STATUS */
+    if(ids.length === 0){
 
-document.getElementById("tempStatus")
-.innerText =
-temperature.toFixed(1)+" °C";
+        container.innerHTML = `
+        <div class="empty">
+        No transformer data received yet.<br><br>
+        Waiting for ESP32...
+        </div>
+        `;
 
-document.getElementById("voltStatus")
-.innerText =
-voltage.toFixed(1)+" V";
-
-document.getElementById("currentStatus")
-.innerText =
-current.toFixed(2)+" A";
-
-document.getElementById("loadStatus")
-.innerText =
-load.toFixed(1)+" %";
+        return;
+    }
 
 
-let status =
-document.getElementById("status");
+    ids.forEach(function(id){
 
-let ai =
-document.getElementById("aiDiagnosis");
+        const data =
+        transformers[id] || {};
+
+        const temperature =
+        Number(data.temperature) || 0;
+
+        const voltage =
+        Number(data.voltage) || 0;
+
+        const current =
+        Number(data.current) || 0;
+
+        let load =
+        Number(data.load);
+
+        if(isNaN(load)){
+            load =
+            (current / 2.5) * 100;
+        }
+
+        if(load > 100){
+            load = 100;
+        }
 
 
-if(
-temperature > 65 ||
-current > 2.2 ||
-voltage < 9
+        const status =
+        data.status || getStatus(
+            temperature,
+            current,
+            voltage
+        );
+
+
+        const card =
+        document.createElement("div");
+
+        card.className =
+        "transformer-card";
+
+        card.onclick =
+        function(){
+
+            showDetail(id);
+
+        };
+
+
+        card.innerHTML = `
+
+        <div class="transformer-title">
+
+            <h2>⚡ ${escapeHTML(id)}</h2>
+
+            <span class="badge ${statusClass(status)}">
+                ${escapeHTML(status)}
+            </span>
+
+        </div>
+
+        <div class="mini-grid">
+
+            <div class="mini">
+                <div class="label">🌡 Temperature</div>
+                <div class="value">
+                    ${temperature.toFixed(1)}
+                    <span class="unit">°C</span>
+                </div>
+            </div>
+
+            <div class="mini">
+                <div class="label">⚡ Voltage</div>
+                <div class="value">
+                    ${voltage.toFixed(1)}
+                    <span class="unit">V</span>
+                </div>
+            </div>
+
+            <div class="mini">
+                <div class="label">🔌 Current</div>
+                <div class="value">
+                    ${current.toFixed(2)}
+                    <span class="unit">A</span>
+                </div>
+            </div>
+
+            <div class="mini">
+                <div class="label">📊 Load</div>
+                <div class="value">
+                    ${load.toFixed(1)}
+                    <span class="unit">%</span>
+                </div>
+            </div>
+
+        </div>
+
+        `;
+
+
+        container.appendChild(card);
+
+    });
+
+}
+
+
+/* =====================================================
+   DETAIL
+===================================================== */
+
+function showDetail(id){
+
+    selectedTransformer = id;
+
+    document.getElementById("transformerList")
+    .style.display = "none";
+
+    document.getElementById("detailView")
+    .classList.add("active");
+
+    updateDetail(id);
+
+}
+
+
+function showList(){
+
+    selectedTransformer = null;
+
+    document.getElementById("detailView")
+    .classList.remove("active");
+
+    document.getElementById("transformerList")
+    .style.display = "grid";
+
+}
+
+
+/* =====================================================
+   UPDATE DETAIL
+===================================================== */
+
+function updateDetail(id){
+
+    const data =
+    transformers[id];
+
+    if(!data){
+        return;
+    }
+
+
+    const temperature =
+    Number(data.temperature) || 0;
+
+    const voltage =
+    Number(data.voltage) || 0;
+
+    const current =
+    Number(data.current) || 0;
+
+    let load =
+    Number(data.load);
+
+    if(isNaN(load)){
+        load =
+        (current / 2.5) * 100;
+    }
+
+    if(load > 100){
+        load = 100;
+    }
+
+
+    const status =
+    data.status ||
+    getStatus(
+        temperature,
+        current,
+        voltage
+    );
+
+
+    document.getElementById("detailTitle")
+    .innerText =
+    "⚡ " + id;
+
+
+    document.getElementById("detailId")
+    .innerText =
+    id;
+
+
+    document.getElementById("detailTemperature")
+    .innerText =
+    temperature.toFixed(1);
+
+
+    document.getElementById("detailVoltage")
+    .innerText =
+    voltage.toFixed(1);
+
+
+    document.getElementById("detailCurrent")
+    .innerText =
+    current.toFixed(2);
+
+
+    document.getElementById("detailLoad")
+    .innerText =
+    load.toFixed(1);
+
+
+    document.getElementById("detailRelay")
+    .innerText =
+    data.relay || "--";
+
+
+    document.getElementById("detailTempStatus")
+    .innerText =
+    temperature.toFixed(1) + " °C";
+
+
+    document.getElementById("detailVoltStatus")
+    .innerText =
+    voltage.toFixed(1) + " V";
+
+
+    document.getElementById("detailCurrentStatus")
+    .innerText =
+    current.toFixed(2) + " A";
+
+
+    document.getElementById("detailLoadStatus")
+    .innerText =
+    load.toFixed(1) + " %";
+
+
+    document.getElementById("detailUpdate")
+    .innerText =
+    new Date().toLocaleTimeString();
+
+
+    document.getElementById("detailAI")
+    .innerText =
+    data.ai || "No AI diagnosis available.";
+
+
+    const statusElement =
+    document.getElementById("detailStatus");
+
+    statusElement.innerText =
+    status;
+
+    statusElement.className =
+    "status " + statusClass(status);
+
+
+    if(!history[id]){
+        history[id] = [];
+    }
+
+
+    history[id].push({
+
+        temperature:
+        temperature,
+
+        voltage:
+        voltage,
+
+        current:
+        current
+
+    });
+
+
+    if(history[id].length > 35){
+
+        history[id].shift();
+
+    }
+
+
+    drawGraph(history[id]);
+
+}
+
+
+/* =====================================================
+   STATUS
+===================================================== */
+
+function getStatus(
+    temperature,
+    current,
+    voltage
 ){
 
-status.innerText =
-"CRITICAL";
+    if(
+        temperature > 65 ||
+        current > 2.2 ||
+        voltage < 9
+    ){
 
-status.style.background =
-"#4b151b";
+        return "CRITICAL";
 
-status.style.color =
-"#ff6b78";
+    }
 
-ai.innerText =
-"Critical condition detected. Check transformer temperature, current/load and voltage immediately.";
 
-}
+    if(
+        temperature > 50 ||
+        current > 1.8
+    ){
 
-else if(
-temperature > 50 ||
-current > 1.8
-){
+        return "WARNING";
 
-status.innerText =
-"WARNING";
+    }
 
-status.style.background =
-"#493b0b";
 
-status.style.color =
-"#ffd85a";
-
-ai.innerText =
-"Warning condition detected. Transformer temperature or load is above the preferred range. Continue monitoring.";
-
-}
-
-else{
-
-status.innerText =
-"NORMAL";
-
-status.style.background =
-"#123d25";
-
-status.style.color =
-"#5cff91";
-
-ai.innerText =
-"Transformer parameters are currently within the normal operating range. Continue monitoring temperature, voltage and current.";
+    return "NORMAL";
 
 }
 
 
-/* TIME */
+function statusClass(status){
 
-document.getElementById("lastUpdate")
-.innerText =
-new Date().toLocaleTimeString();
-
-
-/* GRAPH DATA */
-
-history.push({
-temperature:temperature,
-voltage:voltage,
-current:current
-});
-
-if(history.length > 35){
-history.shift();
-}
-
-drawGraph();
-
-}
+    status =
+    String(status).toUpperCase();
 
 
-function drawGraph(){
-
-ctx.clearRect(
-0,
-0,
-canvas.width,
-canvas.height
-);
+    if(status === "CRITICAL"){
+        return "critical";
+    }
 
 
-/* GRID */
+    if(status === "WARNING"){
+        return "warning";
+    }
 
-ctx.strokeStyle =
-"#253750";
 
-ctx.lineWidth = 1;
+    if(status === "OFFLINE"){
+        return "offline";
+    }
 
-for(let y=30;y<260;y+=45){
 
-ctx.beginPath();
-
-ctx.moveTo(35,y);
-
-ctx.lineTo(680,y);
-
-ctx.stroke();
+    return "normal";
 
 }
 
 
-/* GRAPH */
+/* =====================================================
+   GRAPH
+===================================================== */
 
-if(history.length < 2){
-return;
-}
+function drawGraph(data){
+
+    ctx.clearRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
 
 
-drawLine(
-"temperature",
-80
-);
+    ctx.strokeStyle =
+    "#253750";
 
-drawLine(
-"voltage",
-15
-);
+    ctx.lineWidth = 1;
 
-drawLine(
-"current",
-3
-);
+
+    for(
+        let y=30;
+        y<260;
+        y+=45
+    ){
+
+        ctx.beginPath();
+
+        ctx.moveTo(35,y);
+
+        ctx.lineTo(680,y);
+
+        ctx.stroke();
+
+    }
+
+
+    if(data.length < 2){
+        return;
+    }
+
+
+    drawLine(
+        data,
+        "temperature",
+        80
+    );
+
+
+    drawLine(
+        data,
+        "voltage",
+        15
+    );
+
+
+    drawLine(
+        data,
+        "current",
+        3
+    );
 
 }
 
 
 function drawLine(
-type,
-scale
+    data,
+    type,
+    scale
 ){
 
-ctx.beginPath();
-
-ctx.strokeStyle =
-type === "temperature"
-? "#4fc3f7"
-: type === "voltage"
-? "#ffd54f"
-: "#66ff99";
-
-ctx.lineWidth = 3;
+    ctx.beginPath();
 
 
-history.forEach(
-(data,index)=>{
-
-let x =
-35 +
-index *
-(645 / 34);
-
-let y =
-245 -
-(data[type] / scale) *
-190;
-
-if(index === 0){
-
-ctx.moveTo(x,y);
-
-}else{
-
-ctx.lineTo(x,y);
-
-}
-
-});
+    ctx.strokeStyle =
+    type === "temperature"
+    ? "#4fc3f7"
+    : type === "voltage"
+    ? "#ffd54f"
+    : "#66ff99";
 
 
-ctx.stroke();
-
-}
+    ctx.lineWidth = 3;
 
 
-/*
-DEMO DATA
+    data.forEach(
+    function(item,index){
 
-This is temporary.
+        let x =
+        35 +
+        index *
+        (645 / 34);
 
-Later ESP32 real sensor data
-will replace this section.
-*/
 
-function demoData(){
+        let y =
+        245 -
+        (item[type] / scale) *
+        190;
 
-temperature =
-40 +
-Math.random()*8;
 
-voltage =
-11.3 +
-Math.random()*1;
+        if(index === 0){
 
-current =
-1.1 +
-Math.random()*0.6;
+            ctx.moveTo(x,y);
 
-updateDashboard();
+        }else{
+
+            ctx.lineTo(x,y);
+
+        }
+
+    });
+
+
+    ctx.stroke();
 
 }
 
 
-updateDashboard();
+/* =====================================================
+   SECURITY
+===================================================== */
 
+function escapeHTML(value){
 
-/*
-Demo update every 2 seconds
-*/
+    return String(value)
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
 
-const API_URL = "https://script.google.com/macros/s/AKfycbxJvX3TcFgy0lUlDVTchG-9YGk9K8OsSFqITQoCOqqjNgdA4uV_HEqit1MmDe0uGAUiUw/exec";
-
-function getRealData() {
-  const callbackName = "transformerCallback_" + Date.now();
-
-  window[callbackName] = function(data) {
-    temperature = Number(data.temperature) || 0;
-    voltage = Number(data.voltage) || 0;
-    current = Number(data.current) || 0;
-
-    updateDashboard();
-
-    delete window[callbackName];
-    script.remove();
-  };
-
-  const script = document.createElement("script");
-  script.src = API_URL + "?callback=" + callbackName;
-  document.body.appendChild(script);
 }
+
+
+/* =====================================================
+   START
+===================================================== */
 
 getRealData();
-setInterval(getRealData, 2000);
+
+setInterval(
+    getRealData,
+    3000
+);
 
 </script>
 
